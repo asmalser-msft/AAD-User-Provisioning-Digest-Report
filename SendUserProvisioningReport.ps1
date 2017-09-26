@@ -237,11 +237,11 @@ else {
 $secpasswd = ConvertTo-SecureString $emailPassword -AsPlainText -Force
 $emailLoginCredentials = New-Object System.Management.Automation.PSCredential ($emailUsername, $secpasswd)
 		
-Send-MailMessage -Subject "AD Provisioning Report - $dateFormated [$errorCount errors]" -Body $report -To $emailRecipients -From $emailFrom -SmtpServer smtp.office365.com -usessl -Credential $emailLoginCredentials -Port 587 -Priority $priority
+Send-MailMessage -Subject "AAD Provisioning Report - $dateFormated [$errorCount errors]" -Body $report -To $emailRecipients -From $emailFrom -SmtpServer smtp.office365.com -usessl -Credential $emailLoginCredentials -Port 587 -Priority $priority
 		
-$report | Out-File -FilePath "reports\ADProvisioningReport-$dateFormated.txt" -Force
+$report | Out-File -FilePath "reports\AADProvisioningReport-$dateFormated.txt" -Force
 		
-echo "Wrote ADProvisioningReport-$dateFormated.txt and sent email"
+echo "Wrote AADProvisioningReport-$dateFormated.txt and sent email"
 
 
 
