@@ -103,22 +103,31 @@ function Get-AzureProvisioningAuditReportData
 		$myReportContent = $json.DeserializeObject($myReport.Content)
 		
 		foreach ($event in ($myReportContent).value) {
-			if ($event.activityResultDescription -like "*was created*")
-			{
-				$reportData.usersCreated += $event.activityResultDescription
+			
+			foreach ($detail in $event.additionalDetails) {
+				if ($detail.name -eq "EventName") {
+					$eventName = $detail.value
+				}
 			}
-			if ($event.activityResultDescription -like "*was updated*")
-			{
-				$reportData.usersUpdated += $event.activityResultDescription
+		
+			if ($event.activityResultStatus -eq "Success") {
+				if ($eventName -eq "EntryExportAdd") {
+					$reportData.usersCreated += $event.activityResultDescription
+				}
+				if ($eventName -eq "EntryExportUpdate") {
+					$reportData.usersUpdated += $event.activityResultDescription
+				}
 			}
-			if ($event.activityResultDescription -like "*Failed to create*")
-			{
-				$reportData.userCreateErrors += $event.activityResultDescription -replace "; Error: We will retry this operation on the next synchronization attempt.", ""
+			
+			if ($event.activityResultStatus -eq "Failure") {
+				if ($eventName -eq "EntryExportAdd") {
+					$reportData.userCreateErrors += $event.activityResultDescription -replace "; Error: We will retry this operation on the next synchronization attempt.", ""
+				}
+				if ($eventName -eq "EntryExportUpdate") {
+					$reportData.userUpdateErrors += $event.activityResultDescription -replace "; Error: We will retry this operation on the next synchronization attempt.", ""
+				}
 			}
-			if ($event.activityResultDescription -like "*Failed to update*")
-			{
-				$reportData.userUpdateErrors += $event.activityResultDescription -replace "; Error: We will retry this operation on the next synchronization attempt.", ""
-			}
+			
 		}
 	
 		$url = ($myReportContent).'@odata.nextLink'
