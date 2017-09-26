@@ -1,4 +1,5 @@
-USER PROVISIONING DIGEST Report
+USER PROVISIONING DIGEST REPORT
+
 Author: asmalser
 
  - Reads all user account provisioning events from the Azure AD graph for a specificed time period, and emits a digest report.  
