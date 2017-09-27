@@ -19,13 +19,14 @@ $ClientID       = "---------- ENTER CLIENT APP ID ----------"       # Insert you
 $ClientSecret   = "---------- ENTER CLIENT SECRET ----------"   # Insert your application's Client Key/Secret string
 $tenantdomain   = "---------- ENTER VERIFIED TENANT DOMAIN ----------"    # AAD Tenant; for example, contoso.onmicrosoft.com
 
-
+$sendEmail = $true       #set to $false to not send email and just write the report to a text file
 $emailRecipients = "---------- ENTER EMAIL ADDRESS ----------", "---------- ENTER EMAIL ADDRESS ----------" #Comma-delimited recipient email addresses
 $emailFrom = "---------- ENTER EMAIL ADDRESS OF SENDER ----------"
 $emailUsername = "---------- ENTER O365 USERNAME OF SENDER ----------"
 $emailPassword = "ENTER O365 PASSWORD OF SENDER"
+$fileOutputPath = "reports/"
 
-#Get a report for the last 24 hours be default. Use $fromDate and $toDate below to set the desired range
+#Get a report for the last 24 hours by default. Use $fromDate and $toDate below to set the desired range
 $date = (Get-Date).AddDays(-1) 
 $dateFormated = $date.ToString("yyyy-MM-dd")
 $fromDate = "{0:s}" -f $dateFormated + "T00:00:00Z"
@@ -33,6 +34,7 @@ $toDate = "{0:s}" -f $dateFormated + "T23:59:59Z"
 
 $loginURL       = "https://login.microsoftonline.com"     # AAD Instance, for example https://login.microsoftonline.com; Don't change if this for the public Microsoft Azure
 $resource       = "https://graph.windows.net"             # Azure AD Graph API resource URI; Don't change if this is in the public Microsoft Azure
+
 
 # ----------------------------------
 # Reporting functions 
@@ -237,13 +239,15 @@ else {
 $secpasswd = ConvertTo-SecureString $emailPassword -AsPlainText -Force
 $emailLoginCredentials = New-Object System.Management.Automation.PSCredential ($emailUsername, $secpasswd)
 		
-Send-MailMessage -Subject "AD Provisioning Report - $dateFormated [$errorCount errors]" -Body $report -To $emailRecipients -From $emailFrom -SmtpServer smtp.office365.com -usessl -Credential $emailLoginCredentials -Port 587 -Priority $priority
-		
-$report | Out-File -FilePath "reports\ADProvisioningReport-$dateFormated.txt" -Force
-		
-echo "Wrote ADProvisioningReport-$dateFormated.txt and sent email"
+if ($sendEmail) {			
+	Send-MailMessage -Subject "AD Provisioning Report - $dateFormated [$errorCount errors]" -Body $report -To $emailRecipients -From $emailFrom -SmtpServer smtp.office365.com -usessl -Credential $emailLoginCredentials -Port 587 -Priority $priority
+}
 
+$filePath = $fileOutputPath + "ADProvisioningReport-$dateFormated.txt"
 
+$report | Out-File -FilePath $filePath -Force
+		
+echo "Wrote ADProvisioningReport-$dateFormated.txt"
 
 
 
