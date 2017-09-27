@@ -1,5 +1,5 @@
 ﻿# USER PROVISIONING DIGEST REPORT
-# Author: asmalser
+# Author: https://github.com/asmalser-msft
 #
 # - Reads all user account provisioning events from the Azure AD graph for a specificed time period, and emits a digest report.  
 # - The digest report is written to a text file on the host system, and can also be sent over email using an Office365 email account
