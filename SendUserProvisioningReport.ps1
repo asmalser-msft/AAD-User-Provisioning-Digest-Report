@@ -24,7 +24,7 @@ $emailRecipients = "---------- ENTER EMAIL ADDRESS ----------", "---------- ENTE
 $emailFrom = "---------- ENTER EMAIL ADDRESS OF SENDER ----------"
 $emailUsername = "---------- ENTER O365 USERNAME OF SENDER ----------"
 $emailPassword = "ENTER O365 PASSWORD OF SENDER"
-$fileOutputPath = "reports/"
+$fileOutputPath = ""  #example: c:\reports; defaults to same folder as script
 
 #Get a report for the last 24 hours by default. Use $fromDate and $toDate below to set the desired range
 $date = (Get-Date).AddDays(-1) 
@@ -86,6 +86,7 @@ function Get-AzureProvisioningAuditReportData
 		usersUpdated = @()
 		userCreateErrors = @()
 		userUpdateErrors = @()
+		fullEventDetails = @()
 		fromDate = $fromDate
 		toDate = $toDate
 	}
@@ -129,7 +130,7 @@ function Get-AzureProvisioningAuditReportData
 					$reportData.userUpdateErrors += $event.activityResultDescription -replace "; Error: We will retry this operation on the next synchronization attempt.", ""
 				}
 			}
-			
+			$reportData.fullEventDetails += $event 
 		}
 	
 		$url = ($myReportContent).'@odata.nextLink'
