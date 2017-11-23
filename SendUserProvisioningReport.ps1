@@ -124,10 +124,10 @@ function Get-AzureProvisioningAuditReportData
 			
 			if ($event.activityResultStatus -eq "Failure") {
 				if ($eventName -eq "EntryExportAdd") {
-					$reportData.userCreateErrors += $event.activityResultDescription -replace "; Error: We will retry this operation on the next synchronization attempt.", ""
+					$reportData.userCreateErrors += ($event.activityResultDescription -split ";")[0] #trim extended details
 				}
 				if ($eventName -eq "EntryExportUpdate") {
-					$reportData.userUpdateErrors += $event.activityResultDescription -replace "; Error: We will retry this operation on the next synchronization attempt.", ""
+					$reportData.userUpdateErrors += ($event.activityResultDescription -split ";")[0] #trim extended details
 				}
 			}
 			$reportData.fullEventDetails += $event 
