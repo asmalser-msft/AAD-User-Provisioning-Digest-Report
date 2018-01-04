@@ -158,10 +158,10 @@ function Get-AzureProvisioningAuditReport
         $reportData = Script:Get-AzureProvisioningAuditReportData($null)
     }
 	
-	$countUsersCreated = $reportData.usersCreated.length
-	$countUsersUpdated = $reportData.usersUpdated.length
-	$countUserCreateErrors = $reportData.userCreateErrors.length
-	$countUserUpdateErrors = $reportData.userUpdateErrors.length
+        $countUsersCreated = @($reportData.usersCreated).length
+	$countUsersUpdated = @($reportData.usersUpdated).length
+	$countUserCreateErrors = @($reportData.userCreateErrors).length
+	$countUserUpdateErrors = @($reportData.userUpdateErrors).length 
 	$fromDate = $reportData.fromDate
 	$toDate = $reportData.toDate
 
