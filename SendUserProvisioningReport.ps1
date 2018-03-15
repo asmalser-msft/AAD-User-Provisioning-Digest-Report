@@ -84,8 +84,12 @@ function Get-AzureProvisioningAuditReportData
 	$reportProperties = @{
 		usersCreated = @()
 		usersUpdated = @()
+		usersDisabled = @()
+		usersDeleted = @()
 		userCreateErrors = @()
 		userUpdateErrors = @()
+		userDisableErrors = @()
+		userDeleteErrors = @()
 		fullEventDetails = @()
 		fromDate = $fromDate
 		toDate = $toDate
@@ -120,6 +124,12 @@ function Get-AzureProvisioningAuditReportData
 				if ($eventName -eq "EntryExportUpdate") {
 					$reportData.usersUpdated += $event.activityResultDescription
 				}
+				if ($eventName -eq "EntryExportUpdateSoftDelete") {
+					$reportData.usersDisabled += $event.activityResultDescription
+				}
+				if ($eventName -eq "EntryExportDelete") {
+					$reportData.usersDeleted += $event.activityResultDescription
+				}
 			}
 			
 			if ($event.activityResultStatus -eq "Failure") {
@@ -128,6 +138,12 @@ function Get-AzureProvisioningAuditReportData
 				}
 				if ($eventName -eq "EntryExportUpdate") {
 					$reportData.userUpdateErrors += ($event.activityResultDescription -split ";")[0] #trim extended details
+				}
+				if ($eventName -eq "EntryExportUpdateSoftDelete") {
+					$reportData.userDisableErrors += ($event.activityResultDescription -split ";")[0] #trim extended details
+				}
+				if ($eventName -eq "EntryExportDelete") {
+					$reportData.userDeleteErrors += ($event.activityResultDescription -split ";")[0] #trim extended details
 				}
 			}
 			$reportData.fullEventDetails += $event 
@@ -140,8 +156,12 @@ function Get-AzureProvisioningAuditReportData
 		#remove duplicates
 		$reportData.usersCreated = $reportData.usersCreated | select -uniq | sort
 		$reportData.usersUpdated = $reportData.usersUpdated | select -uniq | sort
+		$reportData.usersDisabled = $reportData.usersDisabled | select -uniq | sort
+		$reportData.usersDeleted = $reportData.usersDeleted | select -uniq | sort
 		$reportData.userCreateErrors = $reportData.userCreateErrors | select -uniq | sort
 		$reportData.userUpdateErrors = $reportData.userUpdateErrors | select -uniq | sort
+		$reportData.userDisableErrors = $reportData.userDisableErrors | select -uniq | sort
+		$reportData.userDeleteErrors = $reportData.userDeleteErrors | select -uniq | sort
 	
 		return $reportData
 }
@@ -160,10 +180,24 @@ function Get-AzureProvisioningAuditReport
 	
         $countUsersCreated = @($reportData.usersCreated).length
 	$countUsersUpdated = @($reportData.usersUpdated).length
+	$countUsersDisabled = @($reportData.usersDisabled).length
+	$countUsersDeleted = @($reportData.usersDeleted).length
 	$countUserCreateErrors = @($reportData.userCreateErrors).length
 	$countUserUpdateErrors = @($reportData.userUpdateErrors).length 
+	$countUserDisableErrors = @($reportData.userDisableErrors).length 
+	$countUserDeleteErrors = @($reportData.userDeleteErrors).length 
 	$fromDate = $reportData.fromDate
 	$toDate = $reportData.toDate
+	
+	#PowerShell bug fix
+        if ($reportData.usersCreated.length -eq 0) { $countUsersCreated = 0 }
+        if ($reportData.usersUpdated.length -eq 0) { $countUsersUpdated = 0 }
+        if ($reportData.usersUDisabled.length -eq 0) { $countUsersDisabled = 0 }
+        if ($reportData.usersDeleted.length -eq 0) { $countUsersDeleted = 0 }
+        if ($reportData.userCreateErrors.length -eq 0) { $countUserCreateErrors = 0 }
+        if ($reportData.userUpdateErrors.length -eq 0) { $countUserUpdateErrors = 0 }
+        if ($reportData.userDisableErrors.length -eq 0) { $countUserDisableErrors = 0 }
+        if ($reportData.userDeleteErrors.length -eq 0) { $countUserDeleteErrors = 0 }
 
 	$report =  "--------------------------------`r`n"
 	$report +=  "SUMMARY `r`n"
@@ -171,8 +205,12 @@ function Get-AzureProvisioningAuditReport
 	$report +=  "From '$fromDate' to '$toDate' `r`n"
 	$report +=  "Users created: $countUsersCreated `r`n"
 	$report +=  "Users updated: $countUsersUpdated `r`n"
-	$report +=  "User creation failures: $countUserCreateErrors `r`n"
+	$report +=  "Users updated: $countUsersDisabled `r`n"
+	$report +=  "Users updated: $countUsersDeleted `r`n"
+	$report +=  "User creation failures: $countUserCreateErrors `r`n"	
 	$report +=  "User update failures: $countUserUpdateErrors `r`n"
+	$report +=  "User disable failures: $countUserDisableErrors `r`n"
+	$report +=  "User delete failures: $countUserDeleteErrors `r`n"
 	$report +=  " `r`n"
 	$report +=  "--------------------------------`r`n"
 	$report +=  "USERS CREATED `r`n"
@@ -191,6 +229,22 @@ function Get-AzureProvisioningAuditReport
 	}
 	$report +=  " `r`n"
 	$report +=  "--------------------------------`r`n"
+	$report +=  "USERS DISABLED `r`n"
+	$report +=  "--------------------------------`r`n"
+	foreach ($user in $reportData.usersDisabled)
+	{
+		$report +=  "$user `r`n"
+	}
+	$report +=  " `r`n"
+	$report +=  "--------------------------------`r`n"
+	$report +=  "USERS DELETED `r`n"
+	$report +=  "--------------------------------`r`n"
+	foreach ($user in $reportData.usersDeleted)
+	{
+		$report +=  "$user `r`n"
+	}
+	$report +=  " `r`n"
+	$report +=  "--------------------------------`r`n"
 	$report +=  "USER CREATE ERRORS `r`n"
 	$report +=  "--------------------------------`r`n"
 	foreach ($user in $reportData.userCreateErrors)
@@ -202,6 +256,22 @@ function Get-AzureProvisioningAuditReport
 	$report +=  "USER UPDATE ERRORS `r`n"
 	$report +=  "--------------------------------`r`n"
 	foreach ($user in $reportData.userUpdateErrors)
+	{
+		$report +=  "$user `r`n"
+	}
+	$report +=  " `r`n"
+	$report +=  "--------------------------------`r`n"
+	$report +=  "USER DISABLE ERRORS `r`n"
+	$report +=  "--------------------------------`r`n"
+	foreach ($user in $reportData.userDisableErrors)
+	{
+		$report +=  "$user `r`n"
+	}
+	$report +=  " `r`n"
+	$report +=  "--------------------------------`r`n"
+	$report +=  "USER DELETE ERRORS `r`n"
+	$report +=  "--------------------------------`r`n"
+	foreach ($user in $reportData.userDeleteErrors)
 	{
 		$report +=  "$user `r`n"
 	}
