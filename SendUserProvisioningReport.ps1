@@ -130,8 +130,7 @@ function Get-AzureProvisioningAuditReportData
 				if ($eventName -eq "EntryExportDelete") {
 					$reportData.usersDeleted += $event.activityResultDescription
 				}
-			}
-			
+			}			
 			if ($event.activityResultStatus -eq "Failure") {
 				if ($eventName -eq "EntryExportAdd") {
 					$reportData.userCreateErrors += ($event.activityResultDescription -split ";")[0] #trim extended details
