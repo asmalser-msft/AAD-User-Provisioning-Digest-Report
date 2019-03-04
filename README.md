@@ -10,6 +10,3 @@ Author: asmalser
 
 - Requires an application entry and secret key to be registered in the Azure AD tenant where the provisioning events exist, as described at:
  https://docs.microsoft.com/en-us/azure/active-directory/active-directory-reporting-api-prerequisites-azure-portal
-
-- In additon, "oauth2AllowImplicitFlow":true must be set in the manifest for this application entry. For details, see:
- https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-application-manifest
